@@ -4,7 +4,7 @@
   "framework": "vite",
   "installCommand": "npm install",
   "rewrites": [
-    { "source": "/__clerk/:path*", "destination": "https://api.clerk.com/:path*" },
+    { "source": "/__clerk/:path*", "destination": "/api/__clerk?path=:path*" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
