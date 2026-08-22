@@ -2,7 +2,7 @@ services:
   - type: web
     name: dayone-api
     runtime: node
-    buildCommand: npm install && npm run build:server
+    buildCommand: npm install --production=false && npm run build:server
     startCommand: npm run start
     envVars:
       - key: NODE_ENV
