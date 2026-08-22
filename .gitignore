@@ -1,0 +1,21 @@
+node_modules
+dist
+
+# Environment secrets
+.env
+.env.local
+.env.production
+
+# Database
+*.db
+data/
+
+# Logs
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build outputs
+dist-server/

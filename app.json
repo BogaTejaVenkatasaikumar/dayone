@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "DayOne",
+    "slug": "dayone",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0f131d"
+    },
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0f131d",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.dayone.learning"
+    },
+    "android": {
+      "package": "com.dayone.learning",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0f131d"
+      }
+    },
+    "web": {
+      "favicon": "./favicon.ico"
+    }
+  }
+}

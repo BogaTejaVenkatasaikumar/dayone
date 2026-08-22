@@ -1,0 +1,232 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #8B5CF6; /* Violet AI color as primary */
+  --color-primary-container: #7c3aed;
+  --color-on-primary-container: #ffffff;
+  --color-secondary: #34D399; /* Mastery color as secondary */
+  --color-tertiary: #F59E0B; /* Challenge color as tertiary */
+  --color-surface: var(--surface);
+  --color-surface-container: var(--surface-container);
+  --color-surface-container-low: var(--surface-container-low);
+  --color-surface-container-high: var(--surface-container-high);
+  --color-surface-container-highest: var(--surface-container-highest);
+  --color-on-surface: var(--on-surface);
+  --color-on-surface-variant: var(--on-surface-variant);
+  --color-outline-variant: var(--outline-variant);
+  --color-error: #F43F5E; /* Critical color as error */
+
+  --font-headline: "Space Grotesk", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+:root {
+  /* Dark Mode is the sole premium theme */
+  --surface: #070B14;
+  --surface-container: #111827;
+  --surface-container-low: #0B1120;
+  --surface-container-high: #151E2F;
+  --surface-container-highest: #1f2937;
+  --on-surface: #F8FAFC;
+  --on-surface-variant: #94A3B8;
+  --outline-variant: rgba(148, 163, 184, 0.12);
+}
+
+@layer base {
+  body {
+    @apply bg-surface text-on-surface font-body antialiased;
+    overflow-x: hidden;
+  }
+
+  #root {
+    position: relative;
+    z-index: 3;
+  }
+
+  button {
+    @apply transition-all duration-150 ease-in-out active:scale-[0.98] cursor-pointer;
+  }
+
+  .rounded-3xl, .rounded-\[2rem\] {
+    border-radius: 16px !important;
+  }
+}
+
+/* Background Effects */
+#curtain {
+  position: fixed; inset: 0; z-index: 9999; background: #070B14;
+  display: flex; align-items: center; justify-content: center;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+#curtain.hide { opacity: 0; visibility: hidden; }
+#curtain .mark {
+  font-family: "JetBrains Mono", monospace; font-size: 12px; letter-spacing: 0.3em; color: #8B5CF6;
+  display: flex; align-items: center; gap: 10px;
+}
+#curtain .mark::before, #curtain .mark::after {
+  content: ''; width: 6px; height: 6px; border-radius: 50%; background: #8B5CF6;
+  animation: curtainPulse 1s ease-in-out infinite;
+}
+#curtain .mark::after { animation-delay: 0.2s; }
+
+@keyframes curtainPulse {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+#particles { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+#spotlight {
+  position: fixed; width: 520px; height: 520px; border-radius: 50%; pointer-events: none; z-index: 1;
+  background: radial-gradient(circle, rgba(139,92,246,0.08), transparent 65%);
+  transform: translate(-50%,-50%); transition: opacity .3s ease; opacity: 0.8;
+}
+
+.grain {
+  position: fixed; inset: 0; z-index: 2; pointer-events: none; opacity: 0.02; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.glass-panel {
+  background: var(--surface-container);
+  border: 1px solid var(--outline-variant);
+  backdrop-filter: blur(12px);
+}
+
+.sprint-gradient {
+  background: linear-gradient(135deg, #8B5CF6 0%, #3b82f6 100%);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: var(--surface);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--surface-container-high);
+  border-radius: 16px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--surface-container-highest);
+}
+
+/* --- Card & Component transitions --- */
+.bg-surface-container, 
+.bg-surface-container-low, 
+.bg-surface-container-high {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.bg-surface-container:hover, 
+.bg-surface-container-low:hover, 
+.bg-surface-container-high:hover {
+  border-color: rgba(139, 92, 246, 0.2);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.25);
+}
+
+/* --- Premium primary button shimmer effect --- */
+button.bg-primary, 
+a.bg-primary {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+button.bg-primary::before, 
+a.bg-primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.5s ease;
+}
+button.bg-primary:hover::before, 
+a.bg-primary:hover::before {
+  transform: translateX(100%);
+}
+button.bg-primary:hover, 
+a.bg-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(139, 92, 246, 0.3);
+}
+
+/* --- Custom Keyframes & Utility Animations --- */
+@keyframes floatY {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+@keyframes shimmer {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(350%); }
+}
+
+.animate-float-y {
+  animation: floatY 5s ease-in-out infinite;
+}
+
+.animate-pulse-dot {
+  animation: pulse-dot 2.4s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  animation: shimmer 1.8s linear infinite;
+}
+
+/* --- Combined Mission Rocket & Circuit Keyframes --- */
+@keyframes twinkle { 0%,100%{ opacity:.15; } 50%{ opacity:.9; } }
+@keyframes idleflame { 0%,100%{ transform: scaleY(1); opacity:.7; } 50%{ transform: scaleY(1.25); opacity:1; } }
+@keyframes bigflame { 0%,100%{ transform: scaleY(1.6) scaleX(1.15); opacity:1; } 50%{ transform: scaleY(2.4) scaleX(.9); opacity:.85; } }
+@keyframes sep {
+  0%{ transform: translate(-50%,0) rotate(0deg); opacity:1; }
+  100%{ transform: translate(calc(-50% + 60px), 160px) rotate(140deg); opacity:0; }
+}
+@keyframes sepflash { 0%{ opacity:0; transform:translate(-50%,10px);} 20%{opacity:1; transform:translate(-50%,0);} 100%{ opacity:0; transform:translate(-50%,-14px);} }
+@keyframes ledblink { 0%,100%{ opacity:1; } 50%{ opacity:.3; } }
+@keyframes gridshift { from{ background-position:0 0,0 0; } to{ background-position:84px 0, 0 84px; } }
+@keyframes sweep { 0%{ top:-140px; } 60%{ top:100vh; } 100%{ top:100vh; } }
+@keyframes ring-pulse { 0%{ transform:scale(.85); opacity:.9; } 100%{ transform:scale(1.35); opacity:0; } }
+@keyframes flow { from{ offset-distance:0%; opacity:0;} 8%{opacity:1;} 92%{opacity:1;} to{ offset-distance:100%; opacity:0; } }
+@keyframes spark-out { to{ transform: translate(var(--dx), var(--dy)) scale(0); opacity:0; } }
+@keyframes shake {
+  10%,90%{ transform: translate(-1px,0); }
+  20%,80%{ transform: translate(2px,-1px); }
+  30%,50%,70%{ transform: translate(-3px,1px); }
+  40%,60%{ transform: translate(3px,-1px); }
+}
+
+.flame { transform-origin: 50% 0%; animation: idleflame 1.2s ease-in-out infinite; }
+.rocket-wrap.igniting .flame { animation: bigflame .5s ease-in-out infinite; }
+.booster {
+  position: absolute; left: 50%; width: 6px; height: 16px; border-radius: 2px;
+  background: linear-gradient(180deg, #94a3b8, #2b2a3a);
+  transform: translate(-50%,0);
+  animation: sep 1s ease-in forwards;
+  pointer-events: none;
+}
+.sep-flash {
+  position: absolute; left: 50%; transform: translate(-50%,0);
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .14em;
+  color: #ff6a3d; animation: sepflash 1s ease-out forwards; white-space: nowrap;
+}
+.spark {
+  position: fixed; width: 4px; height: 4px; border-radius: 50%;
+  background: #49e0f0; box-shadow: 0 0 6px 2px rgba(73,224,240,.8);
+  pointer-events: none; z-index: 50;
+  animation: spark-out .7s ease-out forwards;
+}
+.pulse-dot {
+  position: absolute; top: 0; left: 0; width: 7px; height: 7px; border-radius: 50%;
+  background: #49e0f0;
+  box-shadow: 0 0 8px 2px rgba(73,224,240,.85), 0 0 18px 6px rgba(124,109,242,.35);
+  pointer-events: none; z-index: 1;
+  animation: flow 2.4s linear infinite;
+}

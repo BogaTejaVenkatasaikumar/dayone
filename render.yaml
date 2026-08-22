@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: dayone-api
+    runtime: node
+    buildCommand: npm install && npm run build:server
+    startCommand: npm run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: DATA_DIR
+        value: /data
+      - key: CORS_ORIGIN
+        sync: false  # Set in Render dashboard to your Vercel URL
+      - key: CLERK_SECRET_KEY
+        sync: false  # Set in Render dashboard
+      - key: CLERK_WEBHOOK_SECRET
+        sync: false  # Set in Render dashboard
+      - key: GEMINI_API_KEY
+        sync: false  # Set in Render dashboard
+      - key: GROQ_API_KEY
+        sync: false  # Set in Render dashboard
+    disk:
+      name: sqlite-data
+      mountPath: /data
+      sizeGB: 1
+    healthCheckPath: /api/health
