@@ -4,6 +4,7 @@
   "framework": "vite",
   "installCommand": "npm install",
   "rewrites": [
+    { "source": "/__clerk/(.*)", "destination": "https://clerk.dayone-navy.vercel.app/$1" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
