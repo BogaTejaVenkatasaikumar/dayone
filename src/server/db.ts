@@ -5,12 +5,9 @@ import fs from 'fs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// In production (Render), use the mounted persistent volume at /data.
-// In development, fall back to the local ./data directory.
-const isProduction = process.env.NODE_ENV === 'production';
-const dataDir = isProduction
-  ? (process.env.DATA_DIR || '/data')
-  : path.join(__dirname, '..', '..', 'data');
+// In production (Render), use the mounted persistent volume if available.
+// Otherwise, write to a local './data' directory relative to the project root.
+const dataDir = process.env.DATA_DIR || path.join(process.cwd(), 'data');
 
 // Ensure data directory exists
 if (!fs.existsSync(dataDir)) {
