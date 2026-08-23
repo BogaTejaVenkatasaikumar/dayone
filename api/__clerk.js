@@ -1,36 +1,68 @@
 export default async function handler(req, res) {
-  // Get path from query parameter (forwarded from vercel.json rewrite)
-  const path = req.query.path || '';
-  
-  // Forward to Clerk's Frontend API
-  const clerkUrl = `https://frontend-api.clerk.dev/${path}`;
-  
-  // Copy original headers
-  const headers = {};
-  for (const [key, value] of Object.entries(req.headers)) {
-    if (key.toLowerCase() !== 'host') {
-      headers[key] = value;
-    }
-  }
-  
-  // Set required Clerk proxy headers
-  headers['Clerk-Proxy-Url'] = 'https://dayone-navy.vercel.app/__clerk';
-  headers['Clerk-Secret-Key'] = process.env.CLERK_SECRET_KEY || '';
-  
   try {
+    // 1. Parse path robustly
+    let path = '';
+    if (req.query.path) {
+      path = Array.isArray(req.query.path) ? req.query.path.join('/') : req.query.path;
+    } else {
+      // Fallback: Parse path directly from URL query string
+      const parsedUrl = new URL(req.url, 'http://localhost');
+      path = parsedUrl.searchParams.get('path') || '';
+    }
+
+    // Forward to Clerk's Frontend API
+    const clerkUrl = `https://frontend-api.clerk.dev/${path}`;
+
+    // 2. Clean up request headers (remove forbidden/problematic headers)
+    const requestHeaders = {};
+    const skipRequestHeaders = new Set([
+      'host',
+      'connection',
+      'keep-alive',
+      'transfer-encoding',
+      'content-length'
+    ]);
+
+    for (const [key, value] of Object.entries(req.headers)) {
+      if (!skipRequestHeaders.has(key.toLowerCase())) {
+        requestHeaders[key] = value;
+      }
+    }
+
+    // Set required Clerk proxy headers
+    requestHeaders['Clerk-Proxy-Url'] = 'https://dayone-navy.vercel.app/__clerk';
+    requestHeaders['Clerk-Secret-Key'] = process.env.CLERK_SECRET_KEY || '';
+
+    // Handle body forwarding
+    let requestBody = undefined;
+    if (req.method !== 'GET' && req.method !== 'HEAD' && req.body) {
+      requestBody = typeof req.body === 'object' ? JSON.stringify(req.body) : req.body;
+    }
+
+    // 3. Perform the fetch request
     const response = await fetch(clerkUrl, {
       method: req.method,
-      headers: headers,
-      body: req.method !== 'GET' && req.method !== 'HEAD' ? JSON.stringify(req.body) : undefined,
+      headers: requestHeaders,
+      body: requestBody,
     });
-    
-    // Copy response headers back
+
+    // 4. Clean up response headers before forwarding back to client
+    const skipResponseHeaders = new Set([
+      'connection',
+      'keep-alive',
+      'transfer-encoding',
+      'content-encoding',
+      'content-length'
+    ]);
+
     response.headers.forEach((value, key) => {
-      res.setHeader(key, value);
+      if (!skipResponseHeaders.has(key.toLowerCase())) {
+        res.setHeader(key, value);
+      }
     });
-    
+
     res.status(response.status);
-    
+
     const contentType = response.headers.get('content-type') || '';
     if (contentType.includes('application/json')) {
       const json = await response.json();
@@ -41,6 +73,11 @@ export default async function handler(req, res) {
     }
   } catch (error) {
     console.error('Clerk proxy error:', error);
-    res.status(500).send('Internal Server Error');
+    // Send full error stack to client to easily debug on production
+    res.status(500).json({
+      error: error.message,
+      stack: error.stack,
+      envKeyPresent: !!process.env.CLERK_SECRET_KEY
+    });
   }
 }
