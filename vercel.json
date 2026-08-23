@@ -2,10 +2,8 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "framework": "vite",
-  "installCommand": "npm install",
   "rewrites": [
     { "source": "/__clerk/:path*", "destination": "/api/__clerk?path=:path*" },
-    { "source": "/api/:path*", "destination": "/api/:path*" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/((?!api/|__clerk/).*)", "destination": "/index.html" }
   ]
 }
