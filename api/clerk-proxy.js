@@ -1,3 +1,5 @@
+export const config = { api: { bodyParser: false } };
+
 export default async function handler(req, res) {
   try {
     // 1. Parse path robustly
@@ -5,13 +7,15 @@ export default async function handler(req, res) {
     if (req.query.path) {
       path = Array.isArray(req.query.path) ? req.query.path.join('/') : req.query.path;
     } else {
-      // Fallback: Parse path directly from URL query string
       const parsedUrl = new URL(req.url, 'http://localhost');
       path = parsedUrl.searchParams.get('path') || '';
     }
 
-    // Forward to Clerk's Frontend API
-    const clerkUrl = `https://frontend-api.clerk.dev/${path}`;
+    // 2. Preserve the original query string (e.g. __clerk_api_version, _is_native, etc.)
+    const parsedUrl = new URL(req.url, 'http://localhost');
+    parsedUrl.searchParams.delete('path');
+    const qs = parsedUrl.searchParams.toString();
+    const clerkUrl = `https://frontend-api.clerk.dev/${path}${qs ? '?' + qs : ''}`;
 
     // 2. Clean up request headers (remove forbidden/problematic headers)
     const requestHeaders = {};
@@ -33,10 +37,16 @@ export default async function handler(req, res) {
     requestHeaders['Clerk-Proxy-Url'] = 'https://dayone-navy.vercel.app/__clerk';
     requestHeaders['Clerk-Secret-Key'] = process.env.CLERK_SECRET_KEY || '';
 
-    // Handle body forwarding
+    // Handle body forwarding using raw buffer (preserves Content-Type exactly)
     let requestBody = undefined;
-    if (req.method !== 'GET' && req.method !== 'HEAD' && req.body) {
-      requestBody = typeof req.body === 'object' ? JSON.stringify(req.body) : req.body;
+    if (req.method !== 'GET' && req.method !== 'HEAD') {
+      const chunks = [];
+      for await (const chunk of req) {
+        chunks.push(chunk);
+      }
+      if (chunks.length > 0) {
+        requestBody = Buffer.concat(chunks);
+      }
     }
 
     // 3. Perform the fetch request
