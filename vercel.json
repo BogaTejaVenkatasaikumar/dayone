@@ -3,7 +3,7 @@
   "outputDirectory": "dist",
   "framework": "vite",
   "rewrites": [
-    { "source": "/__clerk/:path*", "destination": "/api/__clerk?path=:path*" },
+    { "source": "/__clerk/:path*", "destination": "/api/clerk-proxy?path=:path*" },
     { "source": "/((?!api|__clerk).*)", "destination": "/index.html" }
   ]
 }
