@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { createClerkClient, verifyToken } from '@clerk/backend';
+import { v4 as uuidv4 } from 'uuid';
 import db from '../db.js';
 import logger from '../logger.js';
 
@@ -50,32 +51,46 @@ export async function requireAuth(req: AuthRequest, res: Response, next: NextFun
     let dbUser = db.prepare('SELECT id, email FROM users WHERE clerk_id = ?').get(clerkId) as { id: string; email: string } | undefined;
     
     // If not found, it might be a new user (webhook pending or local dev)
-    // We'll fetch email from Clerk to try a backup lookup by email
-    let emailPlaceholder = dbUser?.email || '';
+    // We'll fetch user details from Clerk's API and provision them on the fly
     if (!dbUser) {
       try {
         const clerkUser = await clerk.users.getUser(clerkId);
-        emailPlaceholder = clerkUser.emailAddresses?.[0]?.emailAddress || '';
-        if (emailPlaceholder) {
-          const found = db.prepare('SELECT id, email FROM users WHERE email = ?').get(emailPlaceholder) as { id: string; email: string } | undefined;
+        const email = clerkUser.emailAddresses?.[0]?.emailAddress || '';
+        const name = `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim() || 'User';
+        const avatarUrl = clerkUser.imageUrl || '';
+        const emailVerified = clerkUser.emailAddresses?.[0]?.verification?.status === 'verified' ? 1 : 0;
+
+        if (email) {
+          // Check if user exists by email (to merge/link)
+          const found = db.prepare('SELECT id, email FROM users WHERE email = ?').get(email) as { id: string; email: string } | undefined;
           if (found) {
             dbUser = found;
-            // Link them now so subsequent requests are faster
-            db.prepare('UPDATE users SET clerk_id = ? WHERE id = ?').run(clerkId, dbUser.id);
+            db.prepare('UPDATE users SET clerk_id = ?, name = ?, avatar_url = ?, email_verified = ? WHERE id = ?').run(
+              clerkId, name, avatarUrl, emailVerified, dbUser.id
+            );
+            logger.info('JIT linked existing user to Clerk ID', { email, clerkId });
+          } else {
+            // JIT create new user record
+            const newUserId = uuidv4();
+            db.prepare(
+              'INSERT INTO users (id, clerk_id, email, name, avatar_url, email_verified) VALUES (?, ?, ?, ?, ?, ?)'
+            ).run(newUserId, clerkId, email, name, avatarUrl, emailVerified);
+
+            db.prepare('INSERT INTO user_progress (user_id) VALUES (?)').run(newUserId);
+            dbUser = { id: newUserId, email };
+            logger.info('JIT provisioned new user record', { email, clerkId });
           }
         }
-      } catch {
-        // Non-fatal — proceed with what we have
+      } catch (error) {
+        logger.error('JIT provisioning failed', { clerkId, error: (error as Error).message });
       }
     }
 
-    // If STILL not found, we don't have a dbId yet. 
-    // Routes like /api/user/goal (onboarding) handle "lazy-init", 
-    // but others expect a user. For now, we'll set dbId to empty if missing.
+    // Set user payload
     req.user = { 
       id: clerkId, 
       dbId: dbUser?.id || '', 
-      email: dbUser?.email || emailPlaceholder || '' 
+      email: dbUser?.email || '' 
     };
     next();
   } catch (error) {
