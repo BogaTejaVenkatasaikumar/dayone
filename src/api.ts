@@ -15,7 +15,7 @@ let pendingTokenPromise: Promise<string | null> | null = null;
 
 // In production, VITE_API_URL points to the deployed Express backend (e.g. https://dayone-api.onrender.com).
 // In development, Vite's proxy forwards /api → localhost:3001 so BASE_URL stays empty.
-const BASE_URL = import.meta.env.VITE_API_URL || '';
+const BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://dayone-k48l.onrender.com' : '');
 
 export function setTokenGetter(fn: () => Promise<string | null>) {
   _getToken = fn;
