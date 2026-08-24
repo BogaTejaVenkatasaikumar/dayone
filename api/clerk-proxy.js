@@ -37,14 +37,12 @@ export default async function handler(req, res) {
       redirect: 'manual',
     });
 
-    const skipResponseHeaders = new Set(['connection','keep-alive','transfer-encoding','content-encoding','content-length']);
+    const skipResponseHeaders = new Set(['connection','keep-alive','transfer-encoding','content-encoding','content-length','set-cookie']);
 
+    // Forward non-cookie response headers
     response.headers.forEach((value, key) => {
       if (skipResponseHeaders.has(key.toLowerCase())) return;
-      if (key.toLowerCase() === 'set-cookie') {
-        const rewritten = value.replace(/domain=[^;,]*/gi, `domain=.${PROXY_HOST}`);
-        res.setHeader('Set-Cookie', rewritten);
-      } else if (key.toLowerCase() === 'location') {
+      if (key.toLowerCase() === 'location') {
         const rewritten = value.replace(new RegExp(`https://${CLERK_UPSTREAM}`, 'g'), `https://${PROXY_HOST}/__clerk`);
         res.setHeader('Location', rewritten);
       } else {
@@ -52,9 +50,26 @@ export default async function handler(req, res) {
       }
     });
 
+    // Handle ALL Set-Cookie headers properly as an array (prevent overwriting __session cookie)
+    let rawCookies = [];
+    if (typeof response.headers.getSetCookie === 'function') {
+      rawCookies = response.headers.getSetCookie();
+    } else if (response.headers.raw && response.headers.raw()['set-cookie']) {
+      rawCookies = response.headers.raw()['set-cookie'];
+    } else {
+      const single = response.headers.get('set-cookie');
+      if (single) rawCookies = [single];
+    }
+
+    if (rawCookies.length > 0) {
+      const rewrittenCookies = rawCookies.map(cookieStr =>
+        cookieStr.replace(/domain=[^;,]*/gi, `domain=.${PROXY_HOST}`)
+      );
+      res.setHeader('Set-Cookie', rewrittenCookies);
+    }
+
     res.status(response.status);
 
-    // Read body as text first to safely handle empty/redirect responses
     const bodyText = await response.text();
     if (!bodyText) {
       res.end();
