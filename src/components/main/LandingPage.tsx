@@ -1,9 +1,15 @@
 import React, { useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
+import { useUser } from '@clerk/clerk-react';
 import { DayOneLogo } from '../shared/DayOneLogo';
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
+  const { isLoaded, isSignedIn } = useUser();
+
+  if (isLoaded && isSignedIn) {
+    return <Navigate to="/app" replace />;
+  }
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const spotlightRef = useRef<HTMLDivElement | null>(null);
   const curtainRef = useRef<HTMLDivElement | null>(null);

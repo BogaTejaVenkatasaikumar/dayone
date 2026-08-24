@@ -55,6 +55,11 @@ const clerkAppearance = {
 // ─── Auth page wrapper (sign-in / sign-up) ────────────────────────────────────
 function AuthPageWrapper({ mode }: { mode: 'signin' | 'signup' }) {
   const navigate = useNavigate();
+  const { isLoaded, isSignedIn } = useUser();
+
+  if (isLoaded && isSignedIn) {
+    return <Navigate to="/app" replace />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-transparent p-6">
