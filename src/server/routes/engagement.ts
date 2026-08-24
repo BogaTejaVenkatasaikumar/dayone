@@ -204,7 +204,11 @@ router.get('/xp', requireAuth, (req: AuthRequest, res: Response) => {
       userXp = db.prepare('SELECT * FROM user_xp WHERE user_id = ?').get(userId) as any;
     }
 
-    const levelIndex = userXp.level - 1;
+    if (!userXp) {
+      userXp = { level: 1, total_xp: 0, current_streak: 1, longest_streak: 1 };
+    }
+
+    const levelIndex = Math.max(0, (userXp.level || 1) - 1);
     const nextLevelIndex = Math.min(levelIndex + 1, LEVEL_THRESHOLDS.length - 1);
 
     res.json({
