@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@clerk/clerk-react';
+import { BASE_URL } from '../api';
 
 export interface Mission {
   title: string;
@@ -35,8 +36,8 @@ export const useDailyChecklist = (user: any) => {
       const headers = { Authorization: `Bearer ${token}` };
 
       const [missionsRes, xpRes] = await Promise.all([
-        fetch('/api/engagement/missions', { headers }),
-        fetch('/api/engagement/xp', { headers })
+        fetch(`${BASE_URL}/api/engagement/missions`, { headers }),
+        fetch(`${BASE_URL}/api/engagement/xp`, { headers })
       ]);
 
       if (!missionsRes.ok || !xpRes.ok) {
@@ -83,7 +84,7 @@ export const useDailyChecklist = (user: any) => {
 
     try {
       const token = await getToken();
-      const res = await fetch(`/api/engagement/missions/${idx}/complete`, {
+      const res = await fetch(`${BASE_URL}/api/engagement/missions/${idx}/complete`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

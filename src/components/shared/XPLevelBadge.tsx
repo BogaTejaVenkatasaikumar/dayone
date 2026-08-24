@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Zap } from 'lucide-react';
 import { AuthContext } from '../../context/AuthContext';
 import { useAuth } from '@clerk/clerk-react';
+import { BASE_URL } from '../../api';
 
 export const XPLevelBadge: React.FC = () => {
   const { user } = useContext(AuthContext);
@@ -13,7 +14,7 @@ export const XPLevelBadge: React.FC = () => {
   const fetchXp = async () => {
     try {
       const token = await getToken();
-      const res = await fetch('/api/engagement/xp', {
+      const res = await fetch(`${BASE_URL}/api/engagement/xp`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) setXpData(await res.json());

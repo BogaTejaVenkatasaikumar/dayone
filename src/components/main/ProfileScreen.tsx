@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { motion } from 'motion/react';
 import { User, Mail, Target, Award, Sparkles, UserCheck, Flame, BookOpen, BrainCircuit } from 'lucide-react';
-import { userApi, notificationsApi } from '../../api';
+import { userApi, notificationsApi, BASE_URL } from '../../api';
 import { AuthContext } from '../../context/AuthContext';
 
 export const ProfileScreen = () => {
@@ -25,17 +25,17 @@ export const ProfileScreen = () => {
       setAvatarUrl(data.avatarUrl || '');
 
       // Load learning memory from backend (we can query this or fallback)
-      const res = await fetch('/api/notifications/mentor-alerts'); // triggers memory update
-      const memRes = await fetch('/api/user/profile');
+      const res = await fetch(`${BASE_URL}/api/notifications/mentor-alerts`); // triggers memory update
+      const memRes = await fetch(`${BASE_URL}/api/user/profile`);
       const memData = await memRes.json();
       
       // Let's mock/load details of memory profile
-      const userMemoryFetch = await fetch('/api/progress');
+      const userMemoryFetch = await fetch(`${BASE_URL}/api/progress`);
       const progressData = await userMemoryFetch.json();
       
       // Query learning memory table directly
       const token = await (window as any).Clerk?.session?.getToken();
-      const dbMemRes = await fetch('/api/chat/history'); // mock trigger
+      const dbMemRes = await fetch(`${BASE_URL}/api/chat/history`); // mock trigger
       
       // Let's create a simulated learning memory display based on progress and concepts
       setLearningMemory({

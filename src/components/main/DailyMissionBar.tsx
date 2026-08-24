@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CheckCircle2, Circle, Flame, Sparkles } from 'lucide-react';
 import { AuthContext } from '../../context/AuthContext';
-import { setTokenGetter } from '../../api';
+import { setTokenGetter, BASE_URL } from '../../api';
 import { useAuth } from '@clerk/clerk-react';
 
 export const DailyMissionBar: React.FC = () => {
@@ -16,12 +16,12 @@ export const DailyMissionBar: React.FC = () => {
   const fetchMissions = async () => {
     try {
       const token = await getToken();
-      const res = await fetch('/api/engagement/missions', {
+      const res = await fetch(`${BASE_URL}/api/engagement/missions`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) setData(await res.json());
       
-      const xpRes = await fetch('/api/engagement/xp', {
+      const xpRes = await fetch(`${BASE_URL}/api/engagement/xp`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (xpRes.ok) setXpData(await xpRes.json());
@@ -46,7 +46,7 @@ export const DailyMissionBar: React.FC = () => {
     
     try {
       const token = await getToken();
-      const res = await fetch(`/api/engagement/missions/${idx}/complete`, {
+      const res = await fetch(`${BASE_URL}/api/engagement/missions/${idx}/complete`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` }
       });

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, KeyboardEvent } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Play, RotateCcw, Code2, AlertTriangle, CheckCircle2, Zap, Eye, TerminalSquare, BookOpen, ChevronDown, ChevronRight, XCircle, Info, LayoutTemplate } from 'lucide-react';
 import { useAuthContext } from '../../context/AuthContext';
+import { BASE_URL } from '../../api';
 
 type Tab = 'html' | 'css' | 'js';
 type OutputTab = 'preview' | 'console';
@@ -207,7 +208,7 @@ export default function LearningLabScreen() {
     setIsDebugLoading(true);
     try {
       const token = await getToken();
-      const res = await fetch('/api/playground/debug', {
+      const res = await fetch(`${BASE_URL}/api/playground/debug`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -236,7 +237,7 @@ export default function LearningLabScreen() {
       const currentCode = activeTab === 'html' ? htmlCode : activeTab === 'css' ? cssCode : jsCode;
       const token = await getToken();
       
-      const res = await fetch('/api/playground/review', {
+      const res = await fetch(`${BASE_URL}/api/playground/review`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
