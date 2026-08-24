@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useUser, useClerk, useAuth } from '@clerk/clerk-react';
-import { setTokenGetter } from '../api';
+import { setTokenGetter, authApi } from '../api';
 
 interface UserProfile {
   id: string;
@@ -47,12 +47,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return;
     }
     try {
-      const token = await getToken();
-      const res = await fetch('/api/auth/me', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
+      const data = await authApi.getMe();
+      if (data) {
         setUser(data);
       } else {
         // Fall back to Clerk data only
@@ -75,7 +71,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         emailVerified: false,
       });
     }
-  }, [clerkUser, getToken]);
+  }, [clerkUser]);
 
   useEffect(() => {
     if (isLoaded) {
