@@ -7,9 +7,6 @@ export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const { isLoaded, isSignedIn } = useUser();
 
-  if (isLoaded && isSignedIn) {
-    return <Navigate to="/app" replace />;
-  }
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const spotlightRef = useRef<HTMLDivElement | null>(null);
   const curtainRef = useRef<HTMLDivElement | null>(null);
@@ -23,6 +20,12 @@ export const LandingPage: React.FC = () => {
   const labOutputRef = useRef<HTMLDivElement | null>(null);
   const projFillRef = useRef<HTMLDivElement | null>(null);
   const timelineRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (isLoaded && isSignedIn) {
+      navigate('/app', { replace: true });
+    }
+  }, [isLoaded, isSignedIn, navigate]);
 
   useEffect(() => {
     // 1. Hide curtain after load

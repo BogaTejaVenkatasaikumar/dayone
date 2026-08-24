@@ -57,9 +57,11 @@ function AuthPageWrapper({ mode }: { mode: 'signin' | 'signup' }) {
   const navigate = useNavigate();
   const { isLoaded, isSignedIn } = useUser();
 
-  if (isLoaded && isSignedIn) {
-    return <Navigate to="/app" replace />;
-  }
+  useEffect(() => {
+    if (isLoaded && isSignedIn) {
+      navigate('/app', { replace: true });
+    }
+  }, [isLoaded, isSignedIn, navigate]);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-transparent p-6">
