@@ -10,7 +10,6 @@ export default async function handler(req, res) {
     if (req.query.path) {
       path = Array.isArray(req.query.path) ? req.query.path.join('/') : req.query.path;
     }
-
     parsedUrl.searchParams.delete('path');
     const qs = parsedUrl.searchParams.toString();
     const clerkUrl = `https://${CLERK_UPSTREAM}/${path}${qs ? '?' + qs : ''}`;
@@ -54,11 +53,23 @@ export default async function handler(req, res) {
     });
 
     res.status(response.status);
+
+    // Read body as text first to safely handle empty/redirect responses
+    const bodyText = await response.text();
+    if (!bodyText) {
+      res.end();
+      return;
+    }
+
     const contentType = response.headers.get('content-type') || '';
     if (contentType.includes('application/json')) {
-      res.json(await response.json());
+      try {
+        res.json(JSON.parse(bodyText));
+      } catch {
+        res.send(bodyText);
+      }
     } else {
-      res.send(Buffer.from(await response.arrayBuffer()));
+      res.send(bodyText);
     }
   } catch (error) {
     console.error('Clerk proxy error:', error);
